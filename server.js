@@ -202,7 +202,18 @@ app.post('/admin/update-credits', async (req, res) => {
   await supabase.from('users').update({ credits }).eq('id', userId);
   res.json({ success: true });
 });
-
+// ── Notify Make.com on new user ──
+app.post('/new-user-webhook', async (req, res) => {
+  const { email, name } = req.body;
+  try {
+    await fetch(process.env.MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, date: new Date().toISOString() })
+    });
+  } catch(e) { console.log('Make webhook error', e); }
+  res.json({ success: true });
+});
 // ── Health ──
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 
